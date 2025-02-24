@@ -1,16 +1,21 @@
 package main
 
 import (
-	"fmt"
-	"log"
+	"flag"
 	"net/http"
+
+	"golang.org/x/net/webdav"
 )
 
 func main() {
-    http.Handle("/", http.HandlerFunc(func (w http.ResponseWriter, r * http.Request) {
-        urlStr := r.URL.String();
-        fmt.Println("User hit " + urlStr);
-    }))
+    var address string
+    flag.StringVar(&address, "a", "localhost:8001", "Address to listen to.")
+    flag.Parse()
 
-    log.Fatal(http.ListenAndServe(":8001", nil))
+    handler := &webdav.Handler {
+        FileSystem: webdav.Dir("."),
+        LockSystem: webdav.NewMemLS(),
+    }
+
+    http.ListenAndServe(address, handler)
 }
